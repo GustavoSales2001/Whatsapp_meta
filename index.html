@@ -2,152 +2,396 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Currículo que Vence a IA</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Inbox WhatsApp</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #e5ddd5;
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 330px;
+      background: #fff;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      background: #075e54;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .search {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .conversation-list {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .conversation {
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .conversation:hover {
+      background: #f5f5f5;
+    }
+
+    .conversation.active {
+      background: #ebebeb;
+    }
+
+    .conversation-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .conversation-last {
+      color: #666;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      height: 64px;
+      background: #f0f2f5;
+      border-bottom: 1px solid #ddd;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-title {
+      font-weight: bold;
+    }
+
+    .chat-status {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #efeae2;
+    }
+
+    .message {
+      max-width: 65%;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      line-height: 1.4;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .in {
+      background: white;
+      align-self: flex-start;
+    }
+
+    .out {
+      background: #d9fdd3;
+      margin-left: auto;
+    }
+
+    .time {
+      font-size: 11px;
+      color: #777;
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    .composer {
+      padding: 12px;
+      background: #f0f2f5;
+      display: flex;
+      gap: 10px;
+    }
+
+    .composer textarea {
+      flex: 1;
+      height: 45px;
+      resize: none;
+      border: none;
+      border-radius: 20px;
+      padding: 12px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .composer button {
+      width: 90px;
+      border: none;
+      background: #00a884;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .composer button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .empty {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-  <header class="hero">
-    <nav class="navbar">
-      <div class="logo">CVIA</div>
-      <ul class="nav-links">
-        <li><a href="#sobre">Sobre</a></li>
-        <li><a href="#modulos">Módulos</a></li>
-        <li><a href="#beneficios">Benefícios</a></li>
-        <li><a href="#depoimentos">Resultados</a></li>
-      </ul>
-      <a href="#inscricao" class="btn-nav">Quero aprender</a>
-    </nav>
 
-    <div class="hero-content">
-      <div class="hero-text">
-        <p class="tag">Curso online</p>
-        <h1>Currículo que Vence a IA</h1>
-        <p class="subtitle">
-          Aprenda a montar um currículo estratégico, atrativo e preparado para
-          passar pelos filtros automáticos das empresas sem perder sua essência.
-        </p>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">Meu Inbox WhatsApp</div>
 
-        <div class="hero-buttons">
-          <a href="#inscricao" class="btn-primary">Começar agora</a>
-          <a href="#sobre" class="btn-secondary">Saiba mais</a>
-        </div>
-      </div>
+    <div class="search">
+      <input id="searchInput" placeholder="Buscar conversa..." />
+    </div>
 
-      <div class="hero-card">
-        <h3>O que você vai aprender</h3>
-        <ul>
-          <li>Como montar um currículo mais forte</li>
-          <li>Como adaptar palavras-chave para vagas</li>
-          <li>Como chamar atenção do recrutador</li>
-          <li>Como evitar erros que fazem seu currículo ser ignorado</li>
-        </ul>
+    <div id="conversationList" class="conversation-list"></div>
+  </aside>
+
+  <main class="chat">
+    <div id="chatHeader" class="chat-header">
+      <div>
+        <div class="chat-title">Selecione uma conversa</div>
+        <div class="chat-status">Nenhum contato selecionado</div>
       </div>
     </div>
-  </header>
 
-  <section id="sobre" class="section">
-    <div class="container">
-      <h2>Sobre o curso</h2>
-      <p class="section-text">
-        Hoje, muitos currículos são analisados primeiro por sistemas automáticos
-        antes mesmo de chegarem a uma pessoa. Neste curso, você vai entender
-        como esses filtros funcionam e como deixar seu currículo mais estratégico,
-        mais claro e mais competitivo.
-      </p>
-      <p class="section-text">
-        O objetivo é te ajudar a se apresentar melhor, destacar suas qualidades
-        e aumentar suas chances de ser chamado para entrevistas.
-      </p>
+    <div id="messages" class="messages">
+      <div class="empty">Escolha uma conversa para começar</div>
     </div>
-  </section>
 
-  <section id="modulos" class="section alt-bg">
-    <div class="container">
-      <h2>Módulos do curso</h2>
-      <div class="cards">
-        <div class="card">
-          <h3>Módulo 1</h3>
-          <p>Entenda como empresas e sistemas analisam currículos hoje.</p>
-        </div>
-        <div class="card">
-          <h3>Módulo 2</h3>
-          <p>Aprenda a estruturar um currículo limpo, direto e profissional.</p>
-        </div>
-        <div class="card">
-          <h3>Módulo 3</h3>
-          <p>Use palavras-chave certas para aumentar sua compatibilidade com vagas.</p>
-        </div>
-        <div class="card">
-          <h3>Módulo 4</h3>
-          <p>Descubra como destacar experiências, resultados e habilidades.</p>
-        </div>
+    <div class="composer">
+      <textarea id="messageInput" placeholder="Digite uma mensagem..." disabled></textarea>
+      <button id="sendButton" disabled>Enviar</button>
+    </div>
+  </main>
+</div>
+
+<script>
+  const API_URL = "https://cursoslove-production.up.railway.app";
+
+  let conversations = [];
+  let selectedUser = null;
+
+  const conversationList = document.getElementById("conversationList");
+  const messagesBox = document.getElementById("messages");
+  const chatHeader = document.getElementById("chatHeader");
+  const messageInput = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const searchInput = document.getElementById("searchInput");
+
+  async function loadConversations() {
+    try {
+      const res = await fetch(`${API_URL}/api/inbox/conversations`);
+      const data = await res.json();
+
+      conversations = data.conversations || [];
+      renderConversations(conversations);
+    } catch (error) {
+      console.error(error);
+      conversationList.innerHTML = "<p style='padding: 15px;'>Erro ao carregar conversas.</p>";
+    }
+  }
+
+  function renderConversations(list) {
+    conversationList.innerHTML = "";
+
+    list.forEach(conv => {
+      const div = document.createElement("div");
+      div.className = "conversation";
+
+      if (selectedUser && selectedUser.id === conv.id) {
+        div.classList.add("active");
+      }
+
+      div.innerHTML = `
+        <div class="conversation-name">${conv.name || conv.celular}</div>
+        <div class="conversation-last">${conv.last_message || "Sem mensagens ainda"}</div>
+      `;
+
+      div.onclick = () => selectConversation(conv);
+      conversationList.appendChild(div);
+    });
+  }
+
+  async function selectConversation(user) {
+    selectedUser = user;
+
+    chatHeader.innerHTML = `
+      <div>
+        <div class="chat-title">${user.name || user.celular}</div>
+        <div class="chat-status">${user.celular || ""}</div>
       </div>
-    </div>
-  </section>
-<div id="toast" class="toast"></div>
-  <section id="beneficios" class="section">
-    <div class="container">
-      <h2>Por que esse curso pode te ajudar</h2>
-      <div class="benefits">
-        <div class="benefit-item">
-          <span>✔</span>
-          <p>Mais clareza na hora de montar seu currículo</p>
-        </div>
-        <div class="benefit-item">
-          <span>✔</span>
-          <p>Mais chances de passar pelos filtros automáticos</p>
-        </div>
-        <div class="benefit-item">
-          <span>✔</span>
-          <p>Mais confiança para se candidatar às vagas</p>
-        </div>
-        <div class="benefit-item">
-          <span>✔</span>
-          <p>Estratégias práticas e fáceis de aplicar</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    `;
 
-  <section id="depoimentos" class="section alt-bg">
-    <div class="container">
-      <h2>Resultados esperados</h2>
-      <div class="testimonials">
-        <div class="testimonial">
-          <p>
-            “Depois de reorganizar meu currículo com mais estratégia, comecei a
-            me sentir muito mais preparada para enviar candidaturas.”
-          </p>
-          <h4>Exemplo de aluna</h4>
-        </div>
-        <div class="testimonial">
-          <p>
-            “Eu não sabia que pequenos ajustes podiam fazer tanta diferença na
-            apresentação profissional.”
-          </p>
-          <h4>Exemplo de aluno</h4>
-        </div>
-      </div>
-    </div>
-  </section>
+    messageInput.disabled = false;
+    sendButton.disabled = false;
 
-  <section id="inscricao" class="section cta-section">
-    <div class="container cta-box">
-      <h2>Comece a transformar seu currículo hoje</h2>
-      <p>
-        Dê o primeiro passo para criar um currículo mais forte, mais estratégico
-        e mais preparado para o mercado atual.
-      </p>
-      <a href="login.html" class="btn-primary">Quero acessar o curso</a>
-      <p id="ctaMessage" class="cta-message"></p>
-    </div>
-  </section>
+    renderConversations(conversations);
+    await loadMessages(user.id);
+  }
 
-  <footer class="footer">
-    <p>© 2026 Currículo que Vence a IA. Todos os direitos reservados.</p>
-  </footer>
+  async function loadMessages(userId) {
+    try {
+      const res = await fetch(`${API_URL}/api/inbox/messages/${userId}`);
+      const data = await res.json();
 
-  <script src="script.js"></script>
+      const messages = data.messages || [];
+      renderMessages(messages);
+    } catch (error) {
+      console.error(error);
+      messagesBox.innerHTML = "<div class='empty'>Erro ao carregar mensagens.</div>";
+    }
+  }
+
+  function renderMessages(messages) {
+    messagesBox.innerHTML = "";
+
+    if (!messages.length) {
+      messagesBox.innerHTML = "<div class='empty'>Nenhuma mensagem ainda.</div>";
+      return;
+    }
+
+    messages.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = `message ${msg.direction === "in" ? "in" : "out"}`;
+
+      div.innerHTML = `
+        <div>${escapeHtml(msg.message_text || "")}</div>
+        <div class="time">${formatDate(msg.created_at)}</div>
+      `;
+
+      messagesBox.appendChild(div);
+    });
+
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = messageInput.value.trim();
+
+    if (!text || !selectedUser) return;
+
+    sendButton.disabled = true;
+
+    try {
+      await fetch(`${API_URL}/api/inbox/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          message: text
+        })
+      });
+
+      messageInput.value = "";
+      await loadMessages(selectedUser.id);
+      await loadConversations();
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao enviar mensagem.");
+    } finally {
+      sendButton.disabled = false;
+    }
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  function formatDate(date) {
+    if (!date) return "";
+    return new Date(date).toLocaleString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit"
+    });
+  }
+
+  searchInput.addEventListener("input", () => {
+    const term = searchInput.value.toLowerCase();
+
+    const filtered = conversations.filter(conv => {
+      return String(conv.name || "").toLowerCase().includes(term)
+        || String(conv.celular || "").toLowerCase().includes(term)
+        || String(conv.last_message || "").toLowerCase().includes(term);
+    });
+
+    renderConversations(filtered);
+  });
+
+  sendButton.addEventListener("click", sendMessage);
+
+  messageInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  loadConversations();
+
+  setInterval(() => {
+    loadConversations();
+
+    if (selectedUser) {
+      loadMessages(selectedUser.id);
+    }
+  }, 5000);
+</script>
+
 </body>
 </html>
